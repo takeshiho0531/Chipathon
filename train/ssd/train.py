@@ -110,6 +110,5 @@ def train_model(net, dataloaders_dict, criterion, optimizer, num_epochs, save_re
         epoch_val_loss = 0.0  # epochの損失和
 
         # ネットワークを保存する
-        if ((epoch+1) % 10 == 0):
-            torch.save(net.state_dict(), save_weight_path +'ssd300_' +
-                       str(epoch+1) + '.pth')
+        torch.save(net.state_dict(), save_weight_path +'ssd300_' +
+                    str(epoch+1) + '.pth')

@@ -15,7 +15,7 @@ import torch.utils.data as data
 
 # Datasetの作成
 coco_classes = ['person','bicycle', 'car']
-color_mean=() #TODO
+color_mean=(104, 117, 123) #TODO
 input_size = 300
 
 train_img_list, train_anno_list, val_img_list, val_anno_list=make_datapath_list(train_img_path="/home/ubuntu/Chipathon/train/ssd/data/COCO_data/train.txt", 
@@ -61,17 +61,17 @@ net.load_state_dict(net_weights)
 
 # GPUが使えるかを確認
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+#device = torch.device("cpu")
 print("使用デバイス：", device)
 print('ネットワーク設定完了：学習済みの重みをロードしました')
 
 # 層の付け替え
-net.conf[0]=nn.Conv2d(512, 12, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
-net.conf[1]=nn.Conv2d(1024, 18, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
-net.conf[2]=nn.Conv2d(512, 18, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
-net.conf[3]=nn.Conv2d(256, 18, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
-net.conf[4]=nn.Conv2d(256, 12, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
-net.conf[5]=nn.Conv2d(256, 12, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
-
+net.conf[0]=nn.Conv2d(512, 16, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+net.conf[1]=nn.Conv2d(1024, 24, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+net.conf[2]=nn.Conv2d(512, 24, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+net.conf[3]=nn.Conv2d(256, 24, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+net.conf[4]=nn.Conv2d(256, 16, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+net.conf[5]=nn.Conv2d(256, 16, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
 
 layers=[]
 for name, param in net.named_parameters():
@@ -101,7 +101,7 @@ optimizer = optim.SGD(net.parameters(), lr=1e-3,
                       momentum=0.9, weight_decay=5e-4)
 
 ## 学習
-num_epochs=5
+num_epochs=10
 train_model(net, dataloaders_dict, criterion, optimizer, num_epochs=num_epochs, 
             save_result_path="/home/ubuntu/Chipathon/train/ssd/result/log_output.csv", 
-            save_weight_path="/home/ubuntu/Chipathon/train/ssd/weight/trained")
+            save_weight_path="/home/ubuntu/Chipathon/train/ssd/weight/trained/")
