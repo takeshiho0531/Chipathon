@@ -15,14 +15,11 @@ import os.path as osp
 from itertools import product as product
 from math import sqrt as sqrt
 
-# XMLをファイルやテキストから読み込んだり、加工したり、保存したりするためのライブラリ
-import xml.etree.ElementTree as ET
+# data_augumentation.pyからimport。入力画像の前処理をするクラス
+from data_augumentation import Compose, ConvertFromInts, ToAbsoluteCoords, PhotometricDistort, Expand, RandomSampleCrop, RandomMirror, ToPercentCoords, Resize, SubtractMeans
 
-# フォルダ「utils」のdata_augumentation.pyからimport。入力画像の前処理をするクラス
-from utils.data_augumentation import Compose, ConvertFromInts, ToAbsoluteCoords, PhotometricDistort, Expand, RandomSampleCrop, RandomMirror, ToPercentCoords, Resize, SubtractMeans
-
-# フォルダ「utils」にある関数matchを記述したmatch.pyからimport
-from utils.match import match
+# 関数matchを記述したmatch.pyからimport
+from match import match
 
 
 # 学習、検証の画像データとアノテーションデータへのファイルパスリストを作成する
@@ -130,7 +127,7 @@ class DataTransform():
                 ToAbsoluteCoords(),  # アノテーションデータの規格化を戻す
                 PhotometricDistort(),  # 画像の色調などをランダムに変化
                 Expand(color_mean),  # 画像のキャンバスを広げる
-                RandomSampleCrop(),  # 画像内の部分をランダムに抜き出す
+                # RandomSampleCrop(),  # 画像内の部分をランダムに抜き出す
                 RandomMirror(),  # 画像を反転させる
                 ToPercentCoords(),  # アノテーションデータを0-1に規格化
                 Resize(input_size),  # 画像サイズをinput_size×input_sizeに変形
@@ -194,6 +191,8 @@ class VOCDataset(data.Dataset):
 
         # 1. 画像読み込み
         image_file_path = self.img_list[index]
+        # print(index)
+        # print(image_file_path)
         img = cv2.imread(image_file_path)  # [高さ][幅][色BGR]
         height, width, channels = img.shape  # 画像のサイズを取得
 
@@ -299,7 +298,7 @@ def make_extras():
 # デフォルトボックスに対する各クラスの確率を出力するconf_layersを作成
 
 
-def make_loc_conf(num_classes=21, bbox_aspect_num=[4, 6, 6, 6, 4, 4]):
+def make_loc_conf(num_classes=3, bbox_aspect_num=[4, 6, 6, 6, 4, 4]): # TODO:=3って強引
 
     loc_layers = []
     conf_layers = []
@@ -677,7 +676,7 @@ class SSD(nn.Module):
         super(SSD, self).__init__()
 
         self.phase = phase  # train or inferenceを指定
-        self.num_classes = cfg["num_classes"]  # クラス数=21
+        self.num_classes = cfg["num_classes"]  # クラス数=21 #TODO
 
         # SSDのネットワークを作る
         self.vgg = make_vgg()
@@ -742,12 +741,12 @@ class SSD(nn.Module):
         # confのサイズはtorch.Size([batch_num, 183372])になる
         loc = torch.cat([o.view(o.size(0), -1) for o in loc], 1)
         conf = torch.cat([o.view(o.size(0), -1) for o in conf], 1)
-
         # さらにlocとconfの形を整える
         # locのサイズは、torch.Size([batch_num, 8732, 4])
         # confのサイズは、torch.Size([batch_num, 8732, 21])
         loc = loc.view(loc.size(0), -1, 4)
-        conf = conf.view(conf.size(0), -1, self.num_classes)
+        num_classes=int(self.conf[0].out_channels/4)  # TODO
+        conf = conf.view(conf.size(0), -1, num_classes)
 
         # 最後に出力する
         output = (loc, conf, self.dbox_list)
