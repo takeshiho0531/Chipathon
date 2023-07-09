@@ -26,51 +26,34 @@ from utils.match import match
 
 
 # 学習、検証の画像データとアノテーションデータへのファイルパスリストを作成する
+def get_file_path(txt_file_path):
+    path_list=[]
+    with open(txt_file_path, 'r') as file:
+        for line in file:
+            # 各行に対する処理を行います
+            path_list.append(line.strip())
+    return path_list
 
-def make_datapath_list(rootpath):
+
+def make_datapath_list(train_img_path, val_img_path):
     """
     データへのパスを格納したリストを作成する。
 
     Parameters
     ----------
-    rootpath : str
-        データフォルダへのパス
+    train_img_path, val_img_path : str
+        テキストファイルへのパス # TODO: 変数名
 
     Returns
     -------
     ret : train_img_list, train_anno_list, val_img_list, val_anno_list
         データへのパスを格納したリスト
     """
+    train_img_list=get_file_path(train_img_path)
+    val_img_list=get_file_path(val_img_path)
 
-    # 画像ファイルとアノテーションファイルへのパスのテンプレートを作成
-    imgpath_template = osp.join(rootpath, 'JPEGImages', '%s.jpg')
-    annopath_template = osp.join(rootpath, 'Annotations', '%s.xml')
-
-    # 訓練と検証、それぞれのファイルのID（ファイル名）を取得する
-    train_id_names = osp.join(rootpath + 'ImageSets/Main/train.txt')
-    val_id_names = osp.join(rootpath + 'ImageSets/Main/val.txt')
-
-    # 訓練データの画像ファイルとアノテーションファイルへのパスリストを作成
-    train_img_list = list()
-    train_anno_list = list()
-
-    for line in open(train_id_names):
-        file_id = line.strip()  # 空白スペースと改行を除去
-        img_path = (imgpath_template % file_id)  # 画像のパス
-        anno_path = (annopath_template % file_id)  # アノテーションのパス
-        train_img_list.append(img_path)  # リストに追加
-        train_anno_list.append(anno_path)  # リストに追加
-
-    # 検証データの画像ファイルとアノテーションファイルへのパスリストを作成
-    val_img_list = list()
-    val_anno_list = list()
-
-    for line in open(val_id_names):
-        file_id = line.strip()  # 空白スペースと改行を除去
-        img_path = (imgpath_template % file_id)  # 画像のパス
-        anno_path = (annopath_template % file_id)  # アノテーションのパス
-        val_img_list.append(img_path)  # リストに追加
-        val_anno_list.append(anno_path)  # リストに追加
+    train_anno_list= [file_path.replace('.jpg', '.txt') for file_path in train_img_list]  #TODO: 変数名
+    val_anno_list= [file_path.replace('.jpg', '.txt') for file_path in val_img_list]
 
     return train_img_list, train_anno_list, val_img_list, val_anno_list
 
@@ -78,9 +61,9 @@ def make_datapath_list(rootpath):
 # 「XML形式のアノテーション」を、リスト形式に変換するクラス
 
 
-class Anno_xml2list(object):
+class Anno_txt2list(object):
     """
-    1枚の画像に対する「XML形式のアノテーションデータ」を、画像サイズで規格化してからリスト形式に変換する。
+    1枚の画像に対するtxtファイルに記載されたアノテーションデータを、画像サイズで規格化してからリスト形式に変換する。
 
     Attributes
     ----------
@@ -92,13 +75,13 @@ class Anno_xml2list(object):
 
         self.classes = classes
 
-    def __call__(self, xml_path, width, height):
+    def __call__(self, txt_path, width, height):  # TODO: ここから削ったらDataset classからも削る
         """
-        1枚の画像に対する「XML形式のアノテーションデータ」を、画像サイズで規格化してからリスト形式に変換する。
+        1枚の画像に対するtxtファイルに記載されたアノテーションデータを、画像サイズで規格化してからリスト形式に変換する。
 
         Parameters
         ----------
-        xml_path : str
+        txt_path : str
             xmlファイルへのパス。
         width : int
             対象画像の幅。
@@ -111,49 +94,15 @@ class Anno_xml2list(object):
             物体のアノテーションデータを格納したリスト。画像内に存在する物体数分のだけ要素を持つ。
         """
 
-        # 画像内の全ての物体のアノテーションをこのリストに格納します
-        ret = []
+        result = []
 
-        # xmlファイルを読み込む
-        xml = ET.parse(xml_path).getroot()
+        with open(txt_path, 'r') as file:
+            for line in file:
+                line = line.strip()
+                values = [(float(num)) for num in line.split()]
+                result.append(values)
 
-        # 画像内にある物体（object）の数だけループする
-        for obj in xml.iter('object'):
-
-            # アノテーションで検知がdifficultに設定されているものは除外
-            difficult = int(obj.find('difficult').text)
-            if difficult == 1:
-                continue
-
-            # 1つの物体に対するアノテーションを格納するリスト
-            bndbox = []
-
-            name = obj.find('name').text.lower().strip()  # 物体名
-            bbox = obj.find('bndbox')  # バウンディングボックスの情報
-
-            # アノテーションの xmin, ymin, xmax, ymaxを取得し、0～1に規格化
-            pts = ['xmin', 'ymin', 'xmax', 'ymax']
-
-            for pt in (pts):
-                # VOCは原点が(1,1)なので1を引き算して（0, 0）に
-                cur_pixel = int(bbox.find(pt).text) - 1
-
-                # 幅、高さで規格化
-                if pt == 'xmin' or pt == 'xmax':  # x方向のときは幅で割算
-                    cur_pixel /= width
-                else:  # y方向のときは高さで割算
-                    cur_pixel /= height
-
-                bndbox.append(cur_pixel)
-
-            # アノテーションのクラス名のindexを取得して追加
-            label_idx = self.classes.index(name)
-            bndbox.append(label_idx)
-
-            # resに[xmin, ymin, xmax, ymax, label_ind]を足す
-            ret += [bndbox]
-
-        return np.array(ret)  # [[xmin, ymin, xmax, ymax, label_ind], ... ]
+        return np.array(result)  # [[xmin, ymin, xmax, ymax, label_ind], ... ]
 
 
 # 入力画像の前処理をするクラス

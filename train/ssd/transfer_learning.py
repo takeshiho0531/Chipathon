@@ -2,7 +2,7 @@ from ssd_model import SSD
 from ssd_model import MultiBoxLoss
 from train import train_model
 
-from ssd_model import make_datapath_list, VOCDataset, DataTransform, Anno_xml2list, od_collate_fn
+from ssd_model import make_datapath_list, VOCDataset, DataTransform, Anno_txt2list, od_collate_fn
 
 import torch
 import torch.nn as nn
@@ -18,12 +18,14 @@ coco_classes = ['person','bicycle', 'car']
 color_mean=() #TODO
 input_size = 300
 
+train_img_list, train_anno_list, val_img_list, val_anno_list=make_datapath_list(train_img_path="/home/ubuntu/Chipathon/train/ssd/data/COCO_data/train.txt", 
+                                                                                val_img_path="/home/ubuntu/Chipathon/train/ssd/data/COCO_data/val.txt")
 # class名　TODO
 train_dataset = VOCDataset(train_img_list, train_anno_list, phase="train", transform=DataTransform(
-    input_size, color_mean), transform_anno=Anno_xml2list(voc_classes))
+    input_size, color_mean), transform_anno=Anno_txt2list(coco_classes))
 
 val_dataset = VOCDataset(val_img_list, val_anno_list, phase="val", transform=DataTransform(
-    input_size, color_mean), transform_anno=Anno_xml2list(voc_classes))
+    input_size, color_mean), transform_anno=Anno_txt2list(coco_classes))
 
 # DataLoaderを作成する
 batch_size = 32
