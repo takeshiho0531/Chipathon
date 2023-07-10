@@ -161,3 +161,5 @@ cython_debug/
 train/ssd/weight/ssd300_50.pth
 train/ssd/weight/gdrive_download.sh
 train/ssd/data
+train/data
+train/ssd/weight/trained
