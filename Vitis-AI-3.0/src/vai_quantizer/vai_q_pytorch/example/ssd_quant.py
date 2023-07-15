@@ -9,6 +9,7 @@ import argparse
 import time
 import pdb
 import random
+import pytorch_nndct
 from pytorch_nndct.apis import torch_quantizer
 import torch
 from pytorch_nndct.apis import Inspector
@@ -97,7 +98,7 @@ def quantization(title='optimize',
   model_weight=torch.load(file_path, map_location={'cuda:0':'cpu'})
   model.load_state_dict(model_weight)
 
-  input = torch.randn([batch_size, 3, 400, 400])
+  input = torch.randn([batch_size, 3, 300, 300])
   if quant_mode == 'float':
     quant_model = model
     if inspect:
