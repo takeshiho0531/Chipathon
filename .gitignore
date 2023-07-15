@@ -187,3 +187,5 @@ Vitis-AI-3.0/src/vai_quantizer/vai_q_pytorch/csrc
 Vitis-AI-3.0/src/vai_quantizer/vai_q_pytorch/include
 Vitis-AI-3.0/src/vai_quantizer/vai_q_pytorch/LICENSE
 Vitis-AI-3.0/src/vai_quantizer/vai_q_pytorch/requirements.txt
+Vitis-AI-3.0/src/vai_quantizer/vai_q_pytorch/example/ssd/trained/gdrive_download.sh
+Vitis-AI-3.0/.confirm
