@@ -60,6 +60,9 @@ poetry run python3 transfer_learning.py
 - 転移学習させるときのclassはperson/bike/carの3つですが、背景を合わせてnum_classes=4です。
 - 学習済み重みをsetする際にはnum_classesが元のまま21になるようになってますが、転移学習にlayerを付け替えると[同時にnum_classesが4に変わるように](https://github.com/takeshiho0531/Chipathon/blob/train/train/ssd/ssd_model.py#L748)してます。
 
+## その他
+転移学習済みの重みファイルは[ここ](https://drive.google.com/drive/folders/1yhgrCYZDxJQsDRIaUy7C5yp7rLkxsGIc?usp=drive_link)にあります。
+
 ## 参考
 [つくりながら学ぶ! PyTorchによる発展ディープラーニング](https://www.amazon.co.jp/dp/4839970254/)と[そのgithub](https://github.com/YutaroOgawa/pytorch_advanced/tree/master)
 
