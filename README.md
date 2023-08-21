@@ -1,7 +1,9 @@
 # Chipathon
 3S集中講義半導体デザインハッカソン
 
-- [発表資料](https://univtokyo-my.sharepoint.com/:p:/g/personal/6235116183_utac_u-tokyo_ac_jp/EQ_Wx4fGz4VLnndWfeUCglkBr7eKc2D1T9W2hDKg8R5p1A)
+- [発表資料](https://univtokyo-my.sharepoint.com/:p:/g/personal/6235116183_utac_u-tokyo_ac_jp/ESO-iAb2JtNFrIoXPfLz9XkBMw-3lvsAdoxzg4Y9EkDmAw?e=e7AMrf)
+
+- [提出資料](https://univtokyo-my.sharepoint.com/:p:/g/personal/6235116183_utac_u-tokyo_ac_jp/EQ_Wx4fGz4VLnndWfeUCglkBr7eKc2D1T9W2hDKg8R5p1A)
 
 - [講義資料](https://drive.google.com/file/d/1scvGFb0VQZSUi2OSoge756wdoCKoJp2K/view?usp=drive_link)
 
